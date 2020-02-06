@@ -1,8 +1,19 @@
 # Spark Introduction
+## Cheat Sheets
+- [Pyspark API](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_Cheat_Sheet_Python.pdf)
+- [Dataframe API](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/PySpark_SQL_Cheat_Sheet_Python.pdf)
+
+## Starting Pyspark
+After loading your virtual environment, run the following command:
+```bash
+pyspark
+```
 
 ## RDDs
-RDDs can be seen as lists of elements that will be manipulated by applying functions over each element.
-A more complete documentation is available [here](http://spark.apache.org/docs/latest/rdd-programming-guide.html).
+Resilient Distributed Datasets (RDDs) can be seen as lists of elements that
+will be manipulated by applying functions over each element.  A more complete
+documentation is available
+[here](http://spark.apache.org/docs/latest/rdd-programming-guide.html).
 
 ```python
 filename = "trees2016.csv"
@@ -12,8 +23,12 @@ rdd = spark.sparkContext.parallelize(data)
 ```
 `lines` can be seen as a list of independant strings and `rdd` as a list of integer ranging from 0 to 9.
 
+### Action Methods
 - **collect**() : This function will collect the RDD into a python list.
 - **take**(k) : This function create an RDD from `k` element within the RDD.
+- **count**() : This function returns the number of element within the RDD.
+
+### Transformation Methods
 - **map**(func) : Return a new distributed dataset formed by passing each element of the source through a function func.
 ```python
 lines = lines.map(lambda l: l.split(','))
@@ -31,7 +46,7 @@ rdd.flatMap(lambda x: [x*x, x*x*x] if x % 2 == 1 else [])
 rdd.filter(lambda x: x % 3 == 1)
 #Output [1, 4, 7]
 ```
-- **reduceByKey**(func) : 	When called on a dataset of (K, V) pairs, returns a dataset of (K, V) pairs where the values for each key are aggregated using the given reduce function func, which must be of type (V,V) => V. Like in groupByKey, the number of reduce tasks is configurable through an optional second argument.
+- **reduceByKey**(func) : 	When called on a dataset of (K, V) pairs, returns a dataset of (K, V) pairs where the values for each key are aggregated using the given reduce function func, which must be of type (V,V) => V.
 ```python
 data = [(i%3, i) for i in range(10)]
 rdd = spark.sparkContext.parallelize(data)
@@ -123,7 +138,9 @@ df.limit(7)
 - **createDataFrame**(rdd) : Create a dataframe from an RDD.
 ```python
 from pyspark.sql import Row
-trees_rdd = parts.map(lambda p: Row(id=int(p[1]), park_name=p[1], x=p[2], y=p[3]))
+parts = spark.sparkContext.textFile("frenepublicinjection2015.csv")
+parts = parts.map(lambda x: x.split(","))
+trees_rdd = parts.map(lambda p: Row(id=p[0], park_name=p[1], x=p[2], y=p[3]))
 trees_df = spark.createDataFrame(trees_rdd)
 ```
 - **join**() : Combine dataframe based on common column.
@@ -131,7 +148,7 @@ trees_df = spark.createDataFrame(trees_rdd)
 df = df1.join(df2, df2.park_name == df1.park_name)
 ```
 
-## Assignment 
+## Assignment 1
 ### What to do
 The goal of the assignment is to code the empty functions in `answers/answer.py`.
 
@@ -153,6 +170,8 @@ Ali,26,"23 St-Catherine street, Québec"
 ### Dataset
 The dataset for assignment 1 is a CSV file that contains one injection per line.
 A tree is treated once a year.
+
+Since the header and its documentation are in French, here is a quick translation of what each column means:
 
 - **Nom_arrond** :  Neighborhood name.
 - **Invent** : Type of tree injected (H = out of street, R = in street)
